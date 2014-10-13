@@ -1,0 +1,44 @@
+<html xmlns:ex="http://api.simile-widgets.org/exhibit/3.0.0/" xmlns:functx="http://www.functx.com" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:kml="http://earth.google.com/kml/2.0" xmlns:tei="http://www.tei-c.org/ns/1.0" xmlns:tss="http://www.thirdstreetsoftware.com/SenteXML-1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>ashqiyāʾ between 1858 and 1917.</title>
+      <link href="http://www.simile-widgets.org/styles/common.css" rel="stylesheet" type="text/css">
+      <link href="simileData-ashqiya'.js" rel="exhibit-data" type="application/json">
+      <link href="http://api.simile-widgets.org/exhibit/3.0.0/extensions/map/map-extension.js" rel="exhibit-extension" type="text/javascript"><script src="http://api.simile-widgets.org/exhibit/3.0.0/exhibit-api.js"></script></head>
+   <body>
+      <div id="header">
+         <h1>Spatial distribution of 97 reports on ashqiyāʾ between 1858 and 1917.</h1>
+         <p> Using <a href="http://simile-widgets.org/exhibit3/">SIMILE Widgets:
+               Exhibit 3.0</a>. 
+         </p>
+      </div>
+      <div id="content">
+         <div ex:coderClass="ColorGradient" ex:gradientPoints="1, #FF0000; 30, #FF0000; 100, #610B0B" ex:role="coder" id="events-color"></div>
+         <div ex:coderClass="ColorGradient" ex:gradientPoints="1, #FF0000; 2, #FFA500; 3, #FFFF00; 4, #008000; 5, #0000FF; 6, #800080" ex:role="coder" id="type-color"></div>
+         <div ex:coderClass="SizeGradient" ex:gradientPoints="1, 10; 5,30; 30,60; 100, 100" ex:role="coder" id="events-size"></div>
+         <div ex:coderClass="Icon" ex:role="coder" id="events-icon"></div>
+         <table width="100%">
+            <tr valign="top">
+               <td style="width:15%">
+                  <div ex:facetClass="TextSearch" ex:facetLabel="Search" ex:role="facet"></div>
+                  <div ex:expression=".type" ex:facetLabel="Location type" ex:role="facet"></div>
+                  <div ex:expression=".label" ex:facetLabel="Location" ex:role="facet"></div>
+                  <div ex:expression=".eventType" ex:facetLabel="Event type" ex:role="facet"></div>
+               </td>
+               <td ex:role="viewPanel" style="width:69%">
+                  <div ex:center="33.509166, 36.310154" ex:colorCoder="type-color" ex:colorKey=".typeCode" ex:colorLegendLabel="Location type" ex:label="events" ex:latlng=".latlng" ex:mapHeight="580" ex:role="view" ex:shape="circle" ex:showHeader="false" ex:sizeCoder="events-size" ex:sizeKey=".events" ex:sizeLegendLabel="Events" ex:viewClass="Map" ex:zoom="15">
+                     <div class="map-lens" ex:role="lens" style="display: none;">
+                        <div><b ex:content=".label"></b>, <span ex:content=".type"></span></div>
+                        <div><span ex:content=".events"></span> reports on "<span ex:content=".eventType"></span>".
+                        </div>
+                     </div>
+                  </div>
+               </td>
+               <td style="width:15%">
+                  <div ex:border="1" ex:cellPadding="0" ex:cellSpacing="0" ex:columns=".label, .events" ex:role="view" ex:showToolbox="true" ex:sortAscending="false" ex:sortColumn="1" ex:viewClass="Tabular" style="max-width:200px;"></div>
+               </td>
+            </tr>
+         </table>
+      </div>
+   </body>
+</html>
