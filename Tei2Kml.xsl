@@ -285,35 +285,5 @@
             </LabelStyle>
         </Style>
     </xsl:template>
-    <!--<xsl:template name="templKML">
-        <xsl:for-each select=".//tei:place">
-            <xsl:element name="Placemark">
-                <xsl:attribute name="xml:id">
-                    <xsl:value-of select="./@xml:id"/>
-                </xsl:attribute>
-
-                <xsl:element name="name">
-                    <xsl:value-of select="./tei:placeName[@type='simple']"/>
-                </xsl:element>
-                <xsl:element name="description">
-                    <xsl:text>some place</xsl:text>
-                </xsl:element>
-                <xsl:element name="Point">
-                    <xsl:element name="coordinates">
-                        <xsl:variable name="vLat"
-                            select="substring-before(./tei:location/tei:geo, ',')"/>
-                        <xsl:variable name="vLong"
-                            select="substring-after(./tei:location/tei:geo, ',')"/>
-
-                        <xsl:value-of select="$vLong"/>
-                        <xsl:text>, </xsl:text>
-                        <xsl:value-of select="$vLat"/>
-                    </xsl:element>
-                </xsl:element>
-            </xsl:element>
-        </xsl:for-each>
-    </xsl:template>-->
-
-
-
+   
 </xsl:stylesheet>
