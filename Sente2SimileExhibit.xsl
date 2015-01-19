@@ -7,35 +7,18 @@
     
     <xsl:output encoding="UTF-8" indent="yes" method="html" omit-xml-declaration="yes"/>
 
-    <!-- this template produces a structured JSON file to be used for visualisation through MIT's Exhibit widget as well as the HTML with the Exhibit -->
+    <!-- this styleshee produces a structured JSON file to be used for visualisation through MIT's Simile Exhibit widget as well as the HTML with the Exhibit -->
     <!-- It uses geo-data from a reference file ($pgLocs) and checks a given XML for occurences of these locations -->
-    <!-- remember that the SenteSearch provides a way to taylor the Sente XML to a specific searchterm and its nyms -->
     
-    <!-- Plan: add a search function to delimit the number of reference in the input file. This would allow to run the stylesheet on the complete Sente library -->
-
-    <!-- Plan: provide an improved way to calculate the pgMax. This could easily be done by creating a XML tree inside a variable instead of templItemsJson  -->
-
-    <!-- v5: added aggregation by geographical unit, based on the hierachy of the master file. Rewrote much of the script    -->
-    <!-- v4b: added the maximal size of event counts to the color and size coder
-            - added a new eventDetails field to the JSON output-->
-    <!-- v4a: included the html in the output -->
-    <!-- v4: added modes (m2) to produce a HTML density table along the lines of those produced from the timeline data.xml. A parameter allows for selecting the mode -->
-    <!-- v3b: added a label for the event type (eventType), which is provided through a parameter upon instating the stylesheet. through this paramter the output json from numerous tranformations can be combined and displayed as layers on the same map. However, this causes the problem that, if JSON files are collated, the displayed values for individual locations are always collated. No matter which layer you display, each contains the collated value for the contained locations -->
-    <!-- minor problem: the Sente XML output does not distinguish between keywords and tags, apart from the @assigner attribute on keyword elements. If this attribute commences with "Sente User", it is a tag. -->
-    <!-- v3: included the contains-any-of function from http://www.xsltfunctions.com/xsl/functx_contains-any-of.html -->
-    <!-- PROBLEM (solved as of v3: "or" in the count function is not defined for more than two items -->
-    <!-- v2b4: the final item of the templItem cannot be followed by a comma without the JSON not being validated -->
-    <!-- PROBLEM (solved as of v2b3): templCount1 is not working. Somehow, if I parse the values of vSearchField into the contains function, zera results are returned; EVEN FOR "."!!!! -->
-    <!-- v2b3: to prevent the mentioning of Damascus, dimashq etc. in titles, places of publication etc. blurring the results, I limited the search focus to the abstractText and the notes -->
+    <!--  to prevent the mentioning of Damascus, dimashq etc. in titles, places of publication etc. blurring the results, I limited the search focus to the abstractText and the notes -->
 
 
     <xsl:strip-space elements="*"/>
-    <!-- the stylesheets in BachFunctions provide a number functions: the IJMES collation for sorting -->
-    <xsl:include href="/BachUni/projekte/XML/Functions/BachFunctions v3.xsl"/>
+    
 
-    <!-- $pgLocs links to a master file with an ontology of geocoded places / toponyms. It follows the TEI with nested <place> nodes inside <listPlace> in the <sourceDesc> -->
+    <!-- $pgLocs links to a master file with an ontology of geocoded places / toponyms. It follows the TEI with nested <place> nodes inside <listPlace> in the <sourceDesc>. For convenience, pgLocs links to an authority file hosted in a GitHub repository and served through rawgit. -->
     <xsl:param name="pgLocs"
-        select="document('/BachUni/projekte/XML/TEI XML/master files/LocationsMasterTEI.xml')"/>
+        select="document('https://cdn.rawgit.com/tillgrallert/OttomanDamascus/master/LocationsMasterTEI.xml')"/>
     
     <!-- $pgRefs holds all <tss:reference> nodes in the input document -->
     <xsl:param name="pgRefs" select="tss:senteContainer/tss:library/tss:references"/>
@@ -46,7 +29,18 @@
     <!-- This paramter provides the label of the eventType. It is used for the file names, the eventType in the JSON data source, the <head> and the <body> of the HTML output -->
     <xsl:param name="pgType" select="'type'"/>
     
-    <!-- data/event[@start] -->
+    <!-- these variables can be used to down-mark transliterations -->
+    <xsl:variable name="vIjmesDiac">
+        <xsl:text>ĀāĪīŪūḌḍḤḥḪḫḲḳṢṣṬṭṮṯẒẓʾʿ</xsl:text>
+    </xsl:variable>
+    <xsl:variable name="vIjmesNormal">
+        <xsl:text>AaIiUuDdHhHhQqSsTtTtZz''</xsl:text>
+    </xsl:variable>
+    <!-- this variable specifies the sort order according to the IJMES transliteration of Arabic -->
+    <!-- it is called as collation="http://saxon.sf.net/collation?rules={encode-for-uri($sortIjmes)}" -->
+    <xsl:variable name="sortIjmes"
+        select="'&lt; ʾ,ʿ &lt; a,A &lt; ā, Ā &lt; b,B &lt; c,C &lt; d,D &lt; ḍ, Ḍ &lt; e,é,è,E,É,È &lt; f,F &lt; g,G &lt; ġ, Ġ &lt; h,H &lt; ḥ, Ḥ &lt; ḫ, Ḫ &lt; i,I &lt; ī, Ī  &lt; j,J &lt; k,K &lt; ḳ, Ḳ &lt; l,L &lt; m,M &lt; n,N &lt; o,O &lt; p,P &lt; q,Q &lt; r,R &lt; s,S &lt; ṣ, Ṣ &lt; t,T &lt; ṭ, Ṭ &lt; ṯ, Ṯ &lt; u,U &lt; ū, Ū &lt; v,V &lt; w,W &lt; x,X &lt; y,Y &lt; z, Z &lt; ẓ, Ẓ'"/>
+    
     <!-- place holder for the title in the websites title and for file names -->
     <xsl:variable name="vgName">
         <xsl:value-of select="translate($pgType,$vIjmesDiac,$vIjmesNormal)"/>
@@ -79,8 +73,7 @@
 }</xsl:text>
         </xsl:result-document>
     </xsl:template>
-    
-    <!-- changed from v2b3, v5 -->
+   
     <!-- employed in mJson -->
     <xsl:template name="templItemsJson">
         <xsl:for-each select="$pgLocs//tei:place">
@@ -101,25 +94,11 @@
             </xsl:variable>
             <xsl:variable name="vLoc"
                 select="if (./tei:placeName[@xml:lang='ar-Latn-x-ijmes']!='') then (./tei:placeName[@xml:lang='ar-Latn-x-ijmes'][1]) else (./tei:placeName[@type='simple'])"/>
-            <!-- "or" is not allowed in count -->
-            <!-- v5 -->
+           
             <xsl:variable name="vPlaceNamesMentioned1">
                 <xsl:for-each select="$vPlace//tei:placeName[not(.='')]">
                     <xsl:variable name="vPName" select="."/>
-                    <!--<xsl:for-each
-                        select="$pgRefs/tss:reference                 [contains(lower-case(.),lower-case($vPName))]">
-                        
-                        <tss:reference>
-                            <tss:characteristics>
-                                <xsl:element name="tss:characteristic">
-                                    <xsl:attribute name="name" select="'UUID'"/>
-                                    <xsl:value-of
-                                        select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                    />
-                                </xsl:element>
-                            </tss:characteristics>
-                        </tss:reference>
-                    </xsl:for-each>-->
+                    
                     <!-- this searches the reference nodes in the input XML for occurrences to the placeNames -->
                     <xsl:for-each select="$pgRefs/tss:reference">
                         <xsl:choose>
@@ -140,7 +119,7 @@
                             </xsl:when>
                             <xsl:when test="$pgSearchField='notes'">
                                 <xsl:if
-                                    test=".//tss:notes                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
+                                    test=".//tss:notes [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
                                     <tss:reference>
                                         <tss:characteristics>
                                             <xsl:element name="tss:characteristic">
@@ -168,7 +147,6 @@
                                     </tss:reference>
                                 </xsl:if>
                             </xsl:when>
-                            <!--<xsl:when test="$pgSearchField='*'"> </xsl:when>-->
                             <xsl:otherwise>
                                 <xsl:if
                                     test=".               [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
@@ -200,7 +178,7 @@
             <xsl:variable name="vCount">
                 <xsl:value-of select="count($vPlaceNamesMentioned2//tss:reference)"/>
             </xsl:variable>
-            <!-- end v5 -->
+          
 
             <xsl:variable name="vType" select="./@type"/>
             <xsl:variable name="vTypeCode">
@@ -283,8 +261,7 @@
                 <xsl:text>,
                         </xsl:text>
             </xsl:if>
-            <!--<xsl:copy-of select="$vPlaceNamesMentioned1"/>
-            <xsl:copy-of select="$vPlaceNamesMentioned2"/>-->
+            
         </xsl:for-each>
     </xsl:template>
 
@@ -309,7 +286,7 @@
         }</xsl:text>
     </xsl:template>
 
-    <!-- changed from v2b4 -->
+    <!-- the following set of templates and parameters is used to provide the maximum of references that return "true" for the search criteria. This maximum is then used for setting the maximum size of dots in the mapping exhibit.  -->
     <xsl:template name="templCount">
         <xsl:param name="pString1" select="./tei:placeName[@type='simple']"/>
         <xsl:param name="pString2"
@@ -320,8 +297,6 @@
             select="if (./tei:placeName[@type='alt'][ @n='2']!='') then (./tei:placeName[@type='alt'][ @n='1']) else ('fyrg2369')"/>
         <xsl:param name="pLang1"
             select="if (./tei:placeName[@xml:lang='ar']!='') then (./tei:placeName[@xml:lang='ar']) else ('fyrg2369')"/>
-        <!-- <xsl:param name="pLang2" select="if (./tei:placeName[@xml:lang='ar']!='') then (./tei:placeName[@xml:lang='ar']) else ('fyrg2369')"/> -->
-        <!-- arabic returns coocadicoo -->
         <xsl:choose>
             <xsl:when test="$pgSearchField='abstract'">
                 <xsl:value-of
@@ -369,14 +344,7 @@
         </xsl:element>
     </xsl:param>
     <xsl:param name="pgMax" select="max($pgCount//count)"/>
-    <!--<xsl:param name="pgMax">
-        <xsl:for-each-group group-by="." select="$pgCount//count">
-            <xsl:sort data-type="number" order="descending" select="."/>
-            <xsl:if test="position()=1">
-                <xsl:value-of select="current-grouping-key()"/>
-            </xsl:if>
-        </xsl:for-each-group>
-    </xsl:param>-->
+    
 
     <xsl:function as="xs:boolean" name="functx:contains-any-of" xmlns:functx="http://www.functx.com">
         <xsl:param as="xs:string?" name="arg"/>
@@ -390,234 +358,7 @@
         />
     </xsl:function>
 
-    <!-- new in v5 -->
-    <!-- <xsl:template name="tCount1">
-        <!-\- a variable that contains all places, their names, an identifying position, and the count of occurrences in the Sente XML -\->
-        <xsl:variable name="vPlacesMentioned">
-            <xsl:for-each select="$pgLocs//tei:place">
-                <tei:place>
-                    <xsl:attribute name="n" select="position()"/>
-                    <xsl:attribute name="name"> </xsl:attribute>
-
-                    <!-\- establish all references containing a given placename -\->
-                    <xsl:variable name="vPlaceNamesMentioned1">
-                        <xsl:for-each select="./tei:placename">
-                            <xsl:variable name="vPName" select="."/>
-                            <xsl:for-each
-                                select="$pgRefs/tss:reference//tss:characteristic[@name='abstractTect']                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-
-                                <tss:reference>
-                                    <tss:characteristics>
-                                        <xsl:element name="tss:characteristic">
-                                            <xsl:attribute name="name" select="'UUID'"/>
-                                            <xsl:value-of
-                                                select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                            />
-                                        </xsl:element>
-                                    </tss:characteristics>
-                                </tss:reference>
-                            </xsl:for-each>
-                            <xsl:for-each select="$pgRefs/tss:reference">
-                                <xsl:choose>
-                                    <xsl:when test="$pgSearchField='abstract'">
-                                        <xsl:if
-                                            test=".//tss:characteristic[@name='abstractTect']                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                            <tss:reference>
-                                                <tss:characteristics>
-                                                  <xsl:element name="tss:characteristic">
-                                                  <xsl:attribute name="name" select="'UUID'"/>
-                                                  <xsl:value-of
-                                                  select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                                  />
-                                                  </xsl:element>
-                                                </tss:characteristics>
-                                            </tss:reference>
-                                        </xsl:if>
-                                    </xsl:when>
-                                    <xsl:when test="$pgSearchField='notes'">
-                                        <xsl:if
-                                            test=".//tss:notes                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                            <tss:reference>
-                                                <tss:characteristics>
-                                                  <xsl:element name="tss:characteristic">
-                                                  <xsl:attribute name="name" select="'UUID'"/>
-                                                  <xsl:value-of
-                                                  select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                                  />
-                                                  </xsl:element>
-                                                </tss:characteristics>
-                                            </tss:reference>
-                                        </xsl:if>
-                                    </xsl:when>
-                                    <xsl:when test="$pgSearchField='tags'">
-                                        <xsl:if
-                                            test=".//tss:keywords                [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                            <tss:reference>
-                                                <tss:characteristics>
-                                                  <xsl:element name="tss:characteristic">
-                                                  <xsl:attribute name="name" select="'UUID'"/>
-                                                  <xsl:value-of
-                                                  select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                                  />
-                                                  </xsl:element>
-                                                </tss:characteristics>
-                                            </tss:reference>
-                                        </xsl:if>
-                                    </xsl:when>
-                                    <!-\-<xsl:when test="$pgSearchField='*'"> </xsl:when>-\->
-                                    <xsl:otherwise>
-                                        <xsl:if
-                                            test=".               [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                            <tss:reference>
-                                                <tss:characteristics>
-                                                  <xsl:element name="tss:characteristic">
-                                                  <xsl:attribute name="name" select="'UUID'"/>
-                                                  <xsl:value-of
-                                                  select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                                  />
-                                                  </xsl:element>
-                                                </tss:characteristics>
-                                            </tss:reference>
-                                        </xsl:if>
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                            </xsl:for-each>
-                        </xsl:for-each>
-                    </xsl:variable>
-                    <!-\- the previous variable might contained duplicates, which can be omitted by grouping by UUID -\->
-                    <xsl:variable name="vPlaceNamesMentioned2">
-                        <xsl:for-each-group select="$vPlaceNamesMentioned1//tss:reference"
-                            group-by=".//tss:reference//tss:characteristic[@name='UUID']">
-                            <tss:reference/>
-                        </xsl:for-each-group>
-                    </xsl:variable>
-                    <!-\- count the references -\->
-                    <xsl:attribute name="count"
-                        select="count($vPlaceNamesMentioned2//tss:references)"/>
-
-                </tei:place>
-
-            </xsl:for-each>
-        </xsl:variable>
-        <xsl:copy-of select="$vPlacesMentioned"/>
-    </xsl:template>
-
-    <xsl:template name="tCount2">
-        <xsl:param name="pPlace" select="."/>
-        <!-\- establish all references containing a given placename -\->
-        <xsl:variable name="vPlaceNamesMentioned1">
-            <xsl:for-each select="$pPlace//tei:placeName">
-                <xsl:variable name="vPName" select="."/>
-                <xsl:for-each
-                    select="$pgRefs/tss:reference//tss:characteristic[@name='abstractTect']                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-
-                    <tss:reference>
-                        <tss:characteristics>
-                            <xsl:element name="tss:characteristic">
-                                <xsl:attribute name="name" select="'UUID'"/>
-                                <xsl:value-of
-                                    select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                />
-                            </xsl:element>
-                        </tss:characteristics>
-                    </tss:reference>
-                </xsl:for-each>
-                <xsl:for-each select="$pgRefs/tss:reference">
-                    <xsl:choose>
-                        <xsl:when test="$pgSearchField='abstract'">
-                            <xsl:if
-                                test=".//tss:characteristic[@name='abstractTect']                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                <tss:reference>
-                                    <tss:characteristics>
-                                        <xsl:element name="tss:characteristic">
-                                            <xsl:attribute name="name" select="'UUID'"/>
-                                            <xsl:value-of
-                                                select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                            />
-                                        </xsl:element>
-                                    </tss:characteristics>
-                                </tss:reference>
-                            </xsl:if>
-                        </xsl:when>
-                        <xsl:when test="$pgSearchField='notes'">
-                            <xsl:if
-                                test=".//tss:notes                 [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                <tss:reference>
-                                    <tss:characteristics>
-                                        <xsl:element name="tss:characteristic">
-                                            <xsl:attribute name="name" select="'UUID'"/>
-                                            <xsl:value-of
-                                                select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                            />
-                                        </xsl:element>
-                                    </tss:characteristics>
-                                </tss:reference>
-                            </xsl:if>
-                        </xsl:when>
-                        <xsl:when test="$pgSearchField='tags'">
-                            <xsl:if
-                                test=".//tss:keywords                [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                <tss:reference>
-                                    <tss:characteristics>
-                                        <xsl:element name="tss:characteristic">
-                                            <xsl:attribute name="name" select="'UUID'"/>
-                                            <xsl:value-of
-                                                select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                            />
-                                        </xsl:element>
-                                    </tss:characteristics>
-                                </tss:reference>
-                            </xsl:if>
-                        </xsl:when>
-                        <!-\-<xsl:when test="$pgSearchField='*'"> </xsl:when>-\->
-                        <xsl:otherwise>
-                            <xsl:if
-                                test=".               [contains(lower-case(.),lower-case(concat('',$vPName,'')))]">
-                                <tss:reference>
-                                    <tss:characteristics>
-                                        <xsl:element name="tss:characteristic">
-                                            <xsl:attribute name="name" select="'UUID'"/>
-                                            <xsl:value-of
-                                                select="ancestor-or-self::tss:reference//tss:characteristic[@name='UUID']"
-                                            />
-                                        </xsl:element>
-                                    </tss:characteristics>
-                                </tss:reference>
-                            </xsl:if>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:for-each>
-            </xsl:for-each>
-        </xsl:variable>
-        <!-\- the previous variable might contained duplicates, which can be omitted by grouping by UUID -\->
-        <xsl:variable name="vPlaceNamesMentioned2">
-            <xsl:for-each-group select="$vPlaceNamesMentioned1//tss:reference"
-                group-by=".//tss:reference//tss:characteristic[@name='UUID']">
-                <tss:reference/>
-            </xsl:for-each-group>
-        </xsl:variable>
-        <!-\- count the references -\->
-        <xsl:value-of select="count($vPlaceNamesMentioned2//tss:references)"/>
-
-    </xsl:template>
--->
-    <!--    <xsl:template name="templLegend">
-        <div>
-            <p>Collation of the following items: </p>
-            <p>
-                <xsl:for-each-group
-                    select="$pgRefs/tss:reference//tss:characteristic[@name='Short Titel']"
-                    group-by=".">
-                    <xsl:sort select="current-grouping-key()"
-                        collation="http://saxon.sf.net/collation?rules={encode-for-uri($sortIjmes)}"/>
-                    <xsl:value-of select="current-grouping-key()"/>
-                    <xsl:text> (</xsl:text>
-                    <xsl:value-of select="count(current-group())"/>
-                    <xsl:text>), </xsl:text>
-                </xsl:for-each-group>
-            </p>
-        </div>
-    </xsl:template>-->
+    
 
     <!-- mHtml creates the html page with the SIMILE exhibits -->
     <xsl:template match="tss:library" mode="mHtml">
