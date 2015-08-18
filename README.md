@@ -10,5 +10,5 @@ The entire code is hosted in the [GitHub repository corresponding to this site](
 
 Two life-examples mapping nineteenth-century newspaper articles on *ashqiyāʾ* to the city and hinterland of Damascus can be found here:
 
-- [horizontal arrangement](html/simileMapTableH-ashqiya.html)
-- [vertical arrangement](html/simileMapTableV-ashqiya.html)
+- [horizontal arrangement](http://tillgrallert.github.io/MappingOttomanDamascus2014/html/simileMapTableH-ashqiya.html)
+- [vertical arrangement](http://tillgrallert.github.io/MappingOttomanDamascus2014/html/simileMapTableV-ashqiya.html)
