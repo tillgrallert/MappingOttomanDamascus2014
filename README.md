@@ -8,7 +8,7 @@ This small [GitHub](https://www.github.com) website complements my chapter "Mapp
 
 The entire code is hosted in the [GitHub repository corresponding to this site](https://github.com/tillgrallert/MappingOttomanDamascus2014) under a [CreativeCommons---Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)](http://creativecommons.org/licenses/by-sa/3.0/) licence.
 
-Two life-examples mapping nineteenth-century newspaper articles on *ashqiyāʾ* to the city and hinterland of Damascus can be found here:
+Two live-examples mapping nineteenth-century newspaper articles on *ashqiyāʾ* to the city and hinterland of Damascus can be found here:
 
 - [horizontal arrangement](http://tillgrallert.github.io/MappingOttomanDamascus2014/html/simileMapTableH-ashqiya.html)
 - [vertical arrangement](http://tillgrallert.github.io/MappingOttomanDamascus2014/html/simileMapTableV-ashqiya.html)
