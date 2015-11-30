@@ -18,7 +18,7 @@
 
     <!-- $pgLocs links to a master file with an ontology of geocoded places / toponyms. It follows the TEI with nested <place> nodes inside <listPlace> in the <sourceDesc>. For convenience, pgLocs links to an authority file hosted in a GitHub repository and served through rawgit. -->
     <xsl:param name="pgLocs"
-        select="document('https://cdn.rawgit.com/tillgrallert/OttomanDamascus/master/LocationsMasterTEI.xml')"/>
+        select="document('https://rawgit.com/tillgrallert/OttomanDamascus/master/LocationsMaster.TEIP5.xml')"/>
     
     <!-- $pgRefs holds all <tss:reference> nodes in the input document -->
     <xsl:param name="pgRefs" select="tss:senteContainer/tss:library/tss:references"/>
@@ -29,13 +29,12 @@
     <!-- This paramter provides the label of the eventType. It is used for the file names, the eventType in the JSON data source, the <head> and the <body> of the HTML output -->
     <xsl:param name="pgType" select="'type'"/>
     
+    <xsl:param name="pgDateCurrent" select="format-date(current-date(),'[Y01][M01][D01]')"/>
+    
     <!-- these variables can be used to down-mark transliterations -->
-    <xsl:variable name="vIjmesDiac">
-        <xsl:text>ĀāĪīŪūḌḍḤḥḪḫḲḳṢṣṬṭṮṯẒẓʾʿ</xsl:text>
-    </xsl:variable>
-    <xsl:variable name="vIjmesNormal">
-        <xsl:text>AaIiUuDdHhHhQqSsTtTtZz''</xsl:text>
-    </xsl:variable>
+    <xsl:variable name="vIjmesDiac" select="'ĀāĪīŪūḌḍḤḥḪḫḲḳṢṣṬṭṮṯẒẓʾʿ'"/>
+    <xsl:variable name="vIjmesNormal" select="'AaIiUuDdHhHhQqSsTtTtZz'''"/>
+    
     <!-- this variable specifies the sort order according to the IJMES transliteration of Arabic -->
     <!-- it is called as collation="http://saxon.sf.net/collation?rules={encode-for-uri($sortIjmes)}" -->
     <xsl:variable name="sortIjmes"
@@ -46,9 +45,7 @@
         <xsl:value-of select="translate($pgType,$vIjmesDiac,$vIjmesNormal)"/>
     </xsl:variable>
 
-    <xsl:param name="pgDateCurrent" select="format-date(current-date(),'[Y01][M01][D01]')"/>
-
-
+    
     <xsl:template match="tss:senteContainer">
         <xsl:apply-templates mode="mJson"/>
         <xsl:apply-templates mode="mHtml"/>
