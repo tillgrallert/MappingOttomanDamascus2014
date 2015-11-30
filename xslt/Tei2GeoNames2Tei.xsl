@@ -7,12 +7,14 @@
     <xsl:output encoding="UTF-8" indent="yes" method="xml" omit-xml-declaration="no" version="1.0"/>
 
     <!-- This xslt takes a list of place/placeName inside the sourceDesc of a TEI xml as source. 
-        @mode='m2' queries the Api of geonames.org and produces an output file "georeference.xml"
+        @mode='m2' queries the API of geonames.org and produces an output file "georeference.xml"
         @mode='m3' uses this output file and converts it into a valid TEI listPlace element. result is saved to "georeferences-tei.xml" -->
     
-    <!-- this param defines the XML returned from geonames.org -->
+    <!-- this param defines the XML returned from geonames.org. Make sure that it is the same as the one used in the template "templFileGeoNames" -->
     <xsl:param name="pGeonames"
-        select="'/BachUni/projekte/XML/Sente Georeference/output/georeferences.xml'"/>
+        select="'output/georeferences.xml'"/>
+    <!-- this param defines the user name for the API call to geonames.org. Make sure to change to your user name. -->
+    <xsl:param name="pGeonamesUsername" select="'demo'"/>
     <!-- these variables are used to transpose transliterations from GeoNames to Ijmes -->
     <xsl:variable name="vGeoNamesDiac" select="'’‘áḨḨḩŞşŢţz̧'"/>
     <xsl:variable name="vGeoNamesIjmes" select="'ʾʿāḤḤḥṢṣṬṭẓ'"/>
@@ -26,6 +28,7 @@
         </xsl:result-document>
     </xsl:template>
 
+    <!-- reproduce everything -->
     <xsl:template match="@* | node()" mode="m3">
         <xsl:copy>
             <xsl:apply-templates mode="m3" select="@* | node()"/>
@@ -34,7 +37,7 @@
 
 
     <!-- calls the geonames.org api for every distinct value  -->
-    <xsl:template match="tei:listPlace" mode="m2">
+    <xsl:template match="tei:listPlace" name="templFileGeoNames" mode="m2">
         <xsl:result-document href="output/georeferences.xml">
             <xsl:element name="geonames">
                 <!-- add a translate function for the geonames transliteration -->
@@ -153,11 +156,11 @@
         </xsl:copy>
     </xsl:template>
 
-
+    <!-- this stylesheet is reponsible for the actual API call and query of geonames.org -->
     <xsl:template name="templGeoNames">
         <xsl:param name="pApiUrl" select="'http://api.geonames.org/search?name='"/>
         <xsl:param name="pApiOptions"
-            select="'&amp;maxRows=1&amp;style=FULL&amp;lang=en&amp;username=tardigradae'"/>
+            select="concat('&amp;maxRows=1&amp;style=FULL&amp;lang=en&amp;username=',$pGeonamesUsername)"/>
         <xsl:param name="pSearchString"/>
         <xsl:variable name="vDocName">
             <xsl:value-of select="$pApiUrl"/>
@@ -166,5 +169,4 @@
         </xsl:variable>
         <xsl:copy-of select="document($vDocName)/geonames/geoname[1]"/>
     </xsl:template>
-
 </xsl:stylesheet>
