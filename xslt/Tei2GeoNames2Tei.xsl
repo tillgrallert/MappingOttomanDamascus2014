@@ -20,7 +20,7 @@
     <xsl:variable name="vGeoNamesIjmes" select="'ʾʿāḤḤḥṢṣṬṭẓ'"/>
 
     <xsl:template match="tei:TEI">
-        <xsl:apply-templates mode="m2" select=".//tei:sourceDesc/tei:listPlace"/>
+        <xsl:apply-templates mode="m2" select=".//tei:listPlace"/>
         <xsl:result-document href="output/georeferences-tei.xml">
             <xsl:copy>
                 <xsl:apply-templates select="@* | node()" mode="m3"/>
